@@ -43,6 +43,8 @@ namespace IRCProtocol
                 this.Tags = null;
             }
 
+            peek = span.PeekChar();
+
             if (peek == IRCMessage.PrefixsPrefix)
             {
                 span.NextChar();
