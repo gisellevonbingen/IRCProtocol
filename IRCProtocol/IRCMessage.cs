@@ -8,15 +8,20 @@ namespace IRCProtocol
 {
     public class IRCMessage
     {
+        public const char TagsPrefix = '@';
+        public const char TagsSuffix = ' ';
+
         public const char PrefixsPrefix = ':';
         public const char PrefixsSuffix = ' ';
 
+        public IRCTags Tags { get; set; }
         public IRCPrefix Prefix { get; set; }
         public string Command { get; set; }
         public IRCParams Params { get; set; }
 
         public IRCMessage()
         {
+            this.Tags = null;
             this.Prefix = null;
             this.Command = null;
             this.Params = null;
@@ -25,10 +30,22 @@ namespace IRCProtocol
         public IRCMessage Parse(string text)
         {
             var span = new StringSpan(text);
-            var next = span.NextChar(IRCMessage.PrefixsPrefix);
+            var peek = span.PeekChar();
 
-            if (next == IRCMessage.PrefixsPrefix)
+            if (peek == IRCMessage.TagsPrefix)
             {
+                span.NextChar();
+                var tagsText = span.TakeToSeparator(IRCMessage.TagsSuffix, false, true);
+                this.Tags = new IRCTags().Parse(tagsText);
+            }
+            else
+            {
+                this.Tags = null;
+            }
+
+            if (peek == IRCMessage.PrefixsPrefix)
+            {
+                span.NextChar();
                 var prefixText = span.TakeToSeparator(IRCMessage.PrefixsSuffix, false, true);
                 this.Prefix = new IRCPrefix().Parse(prefixText);
             }
